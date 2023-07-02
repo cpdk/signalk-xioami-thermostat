@@ -1,6 +1,5 @@
 import {Peripheral} from '@abandonware/noble';
 import {Log} from './log/log-manager';
-import { BLEDeviceRegister } from './ble/ble-device-register';
 import { DiscoveredDevice } from './ble/discovered-device';
 import { ServiceUUID } from './ble/ble-service-uuids';
 import { StringUtils } from './util/string-utils';
@@ -18,7 +17,6 @@ export class BleScanner {
     private static lastState = 'Unknown';
     
     private listeners: Array<(d: DiscoveredDevice) => void> = [];
-    private deviceRegister: BLEDeviceRegister;
 
     public static get() {
         if (!BleScanner._instance) {
@@ -30,7 +28,6 @@ export class BleScanner {
     private constructor() {
         this.ensureBLELoaded();
         this.registerListeners();
-        this.deviceRegister = new BLEDeviceRegister();
     }
 
     private ensureBLELoaded() {
@@ -80,19 +77,11 @@ export class BleScanner {
             Log.info('Ignoring device: ' + peripheral.advertisement?.localName);
             return;
           }
-          //Dismiss where scan on address is ongoing
-          if (this.deviceRegister.getByAddress(peripheral.address)?.scanningOngoing) {
-            return;
-          }
-          //Dismiss but update UI on devices that have been discovered but is not scanned
-          if (this.deviceRegister.getByAddress(peripheral.address)?.discoveredDevice) {
-            this.updateUI(peripheral, this.deviceRegister.getByAddress(peripheral.address)?.discoveredDevice)
-            return;
-          }
+         
           if (peripheral.state !== 'disconnected') {
             return;
           }
-          const discoveredDevice = this.deviceRegister.createDiscoveredDevice(peripheral);
+          const discoveredDevice = this.createDiscoveredDevice(peripheral);
 
           discoveredDevice.lastTemperature = 12;
           discoveredDevice.lastHumidity = 34;
@@ -106,6 +95,18 @@ export class BleScanner {
         const me = this;
         Log.info('All listeners added');
     }
+
+    private createDiscoveredDevice(peripheral: Peripheral): DiscoveredDevice {
+
+        let discoveredDevice = {} as DiscoveredDevice;
+        discoveredDevice.lastSeen = new Date().getTime();
+        discoveredDevice.address = peripheral.address;
+        discoveredDevice.localName = peripheral.advertisement.localName;
+        peripheral = peripheral;
+        Log.info('Create new discovered device:'+JSON.stringify(discoveredDevice))
+        return discoveredDevice;
+      }
+    
 
   private updateUI(peripheral: Peripheral, device: DiscoveredDevice|undefined) {
     if (!device) return;
