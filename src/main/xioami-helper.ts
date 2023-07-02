@@ -9,10 +9,11 @@ export class XioamiHelper {
     
     public static startBLEScanner(): void {
         const scanner = BleScanner.get();
-        scanner.startScanning();
+
+        setTimeout(scanner.startScanning, 1000);
     }
     
-    public static registerListener(listener: (d: DiscoveredDevice) => void) {
+    public static registerListener(listener: (d: BLEDevice) => void) {
         const scanner = BleScanner.get();
         scanner.registerListener(listener);
     }

@@ -3,6 +3,7 @@ import {Log} from './log/log-manager';
 import { DiscoveredDevice } from './ble/discovered-device';
 import { ServiceUUID } from './ble/ble-service-uuids';
 import { StringUtils } from './util/string-utils';
+import { BLEDevice } from './ble-device';
 
 let noble: any;
 
@@ -16,7 +17,7 @@ export class BleScanner {
     private static atcOnly = true;
     private static lastState = 'Unknown';
     
-    private listeners: Array<(d: DiscoveredDevice) => void> = [];
+    private listeners: Array<(d: BLEDevice) => void> = [];
 
     public static get() {
         if (!BleScanner._instance) {
@@ -42,7 +43,7 @@ export class BleScanner {
         }
     }
 
-    public registerListener(l: (d: DiscoveredDevice) => void) {
+    public registerListener(l: (d: BLEDevice) => void) {
         this.listeners.push(l);
     }
 
@@ -96,15 +97,31 @@ export class BleScanner {
         Log.info('All listeners added');
     }
 
-    private createDiscoveredDevice(peripheral: Peripheral): DiscoveredDevice {
+    private createDiscoveredDevice(peripheral: Peripheral): BLEDevice {
+        // Log.info('Reading device: ' + peripheral.address + ' - ' + JSON.stringify(peripheral.advertisement));
+        
+        // "data":[164,193,56,224,176,99,1,9,49,85,11,152,4]}}]}
+        const data = peripheral.advertisement.serviceData[0].data;
+        // console.log(data.toString('base64'));
+        // console.log('Data has: ' + data.byteLength + ' bytes');
+        // console.log('Temperature: ' + data.readInt16BE(6) / 10);
+        // console.log('Humidity: ' + data.readInt8(8));
+        // const b = data.readInt8(9);
+        // console.log('Battery: ' + b);
+        // const v = (data.readInt8(10) * 256 + data.readInt8(11)) / 1000;
+        // console.log('Voltage: ' + v);
 
-        let discoveredDevice = {} as DiscoveredDevice;
-        discoveredDevice.lastSeen = new Date().getTime();
-        discoveredDevice.address = peripheral.address;
-        discoveredDevice.localName = peripheral.advertisement.localName;
-        peripheral = peripheral;
-        Log.info('Create new discovered device:'+JSON.stringify(discoveredDevice))
-        return discoveredDevice;
+        let d = {} as BLEDevice;
+        d.lastSeen = new Date().toISOString();
+        d.address = peripheral.address;
+        d.address = peripheral.advertisement.localName;
+        d.lastTemperature = data.readInt16BE(6) / 10;
+        d.lastHumidity = data.readInt8(8)
+        d.lastBattery = data.readInt8(9);
+        d.lastVoltage = (data.readInt8(10) * 256 + data.readInt8(11)) / 1000;
+
+        // Log.info('Created device: ' + JSON.stringify(d));
+        return d;
       }
     
 
@@ -120,11 +137,14 @@ export class BleScanner {
     public startScanning() {
         if (BleScanner.btReady) {
             if (BleScanner.atcOnly) {
+                Log.info('Starting scanning for: ' + ServiceUUID.EnvironmentDataService);
                 noble.startScanning([StringUtils.toNobleFormat(ServiceUUID.EnvironmentDataService)], true);
             } else {
+                Log.info('Starting scanning for all devices');
                 noble.startScanning();
             }
         } else {
+            Log.warn('Bluetooth not ready');
             BleScanner.btError = 'Bluetooth not ready';
         }
     }

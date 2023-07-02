@@ -36,40 +36,57 @@ export default function (app: any) {
       const handleDevice = (d: BLEDevice) => {
         foundDevices[d.address] = d;
         
+        const reportData = () => {
+          app.handleMessage(plugin.id, {
+            updates: [
+              {
+                values: [ 
+                  {
+                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.temperature`,
+                    value: d.lastTemperature
+                  },
+                  {
+                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.humidity`,
+                    value: d.lastHumidity
+                  },
+                  {
+                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.battery`,
+                    value: d.lastBattery
+                  },
+                  {
+                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.voltage`,
+                    value: d.lastVoltage
+                  },
+              ]
+              }
+            ]
+          });
+        };
+
         if (d.enabled) {
           // start timer for device
           const interval = setInterval(() => {
             const last = new Date(d.lastSeen).getTime();
             const now = Date.now();
-
+            console.log('Reporting for: ' + d.address);
             if (now - last < 10 * 1000 * d.reportRate) {
-              app.handleMessage(plugin.id, {
-                updates: [
-                  {
-                    values: [ {
-                      path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.temperature`,
-                      value: Number(d.lastTemperature)
-                    }]
-                  }
-                ]
-              });
+                reportData();
             }
           }, d.reportRate * 1000);
-          onStop.push(() => clearInterval(interval))
+          onStop.push(() => clearInterval(interval));
+          reportData();
         }
       };
 
       app.debug('Xioami BLE Plugin starting');
       XioamiHelper.startBLEScanner();
-      XioamiHelper.registerListener((d: DiscoveredDevice) => {
-        app.debug('Discovered new device: ' + d.address + ' ' + d.localName);
-
+      XioamiHelper.registerListener((d: BLEDevice) => {
         // check against known devices
         let device: BLEDevice | undefined = undefined;
         for (const de of knownDevices) {
           if (de.address == d.address) {
             device = de;
-            app.debug('Device is known registry: ' + de.dataName);
+            // app.debug('Device is known in registry: ' + de.dataName);
             break;
           }
         }
@@ -77,19 +94,28 @@ export default function (app: any) {
           app.debug('Creating new device in registry');
           device = {
             address: d.address,
-            enabled: false, 
-            dataName: d.localName,
+            enabled: true, 
+            dataName: d.address,
             lastSeen: new Date().toISOString(),
             firstSeen: new Date().toISOString(),
             reportRate: 60,
             inside: true,
-            name: d.localName,
+            name: d.address,
             lastHumidity: d.lastHumidity,
-            lastTemperature: d.lastTemperature
+            lastTemperature: d.lastTemperature,
+            lastBattery: d.lastBattery,
+            lastVoltage: d.lastVoltage
           }
-          knownDevices.push(device);
           handleDevice(device);
+          knownDevices.push(device);
         }
+        
+        device.lastHumidity = d.lastHumidity;
+        device.lastTemperature = d.lastTemperature;
+        device.lastBattery = d.lastBattery;
+        device.lastVoltage = d.lastVoltage;
+        device.lastSeen = d.lastSeen;
+        
 
       });
       
