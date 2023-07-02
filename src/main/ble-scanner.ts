@@ -1,6 +1,5 @@
 import {Peripheral} from '@abandonware/noble';
 import {Log} from './log/log-manager';
-import { DiscoveredDevice } from './ble/discovered-device';
 import { ServiceUUID } from './ble/ble-service-uuids';
 import { StringUtils } from './util/string-utils';
 import { BLEDevice } from './ble-device';
@@ -69,23 +68,14 @@ export class BleScanner {
             } else {
                 BleScanner.btReady = false;
             }
-            // this.notifyState();
         });
 
         noble.on('discover', (peripheral: Peripheral) => {
-          //dismiss not a dialoq device
-          if (!peripheral.advertisement || !peripheral.advertisement.localName?.includes('ATC')) {
-            Log.info('Ignoring device: ' + peripheral.advertisement?.localName);
-            return;
-          }
          
           if (peripheral.state !== 'disconnected') {
             return;
           }
           const discoveredDevice = this.createDiscoveredDevice(peripheral);
-
-          discoveredDevice.lastTemperature = 12;
-          discoveredDevice.lastHumidity = 34;
 
           for (const l of this.listeners) {
             l(discoveredDevice);
@@ -94,22 +84,16 @@ export class BleScanner {
         });
 
         const me = this;
-        Log.info('All listeners added');
     }
 
     private createDiscoveredDevice(peripheral: Peripheral): BLEDevice {
-        // Log.info('Reading device: ' + peripheral.address + ' - ' + JSON.stringify(peripheral.advertisement));
+        // Log.info('Reading data from: ' + peripheral.address + ' - ' + JSON.stringify(peripheral.advertisement));
         
-        // "data":[164,193,56,224,176,99,1,9,49,85,11,152,4]}}]}
         const data = peripheral.advertisement.serviceData[0].data;
-        // console.log(data.toString('base64'));
-        // console.log('Data has: ' + data.byteLength + ' bytes');
-        // console.log('Temperature: ' + data.readInt16BE(6) / 10);
-        // console.log('Humidity: ' + data.readInt8(8));
-        // const b = data.readInt8(9);
-        // console.log('Battery: ' + b);
-        // const v = (data.readInt8(10) * 256 + data.readInt8(11)) / 1000;
-        // console.log('Voltage: ' + v);
+
+        // const f = Buffer.from([data.readInt8(0), data.readInt8(1), data.readInt8(2)
+        //                 , data.readInt8(3), data.readInt8(4), data.readInt8(5)]);
+        // console.log('First ' + f.length + ' bytes as hex: ' + f.toString('hex'));
 
         let d = {} as BLEDevice;
         d.lastSeen = new Date().toISOString();
@@ -124,15 +108,6 @@ export class BleScanner {
         return d;
       }
     
-
-  private updateUI(peripheral: Peripheral, device: DiscoveredDevice|undefined) {
-    if (!device) return;
-    device.localName = peripheral.advertisement.localName;
-    device.lastSeen = Date.now();
-    device.rssi = peripheral.rssi;
-    device.state = peripheral.state;
-    // this.win.webContents.send('ble-device-found', device);
-  }
 
     public startScanning() {
         if (BleScanner.btReady) {

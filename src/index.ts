@@ -14,7 +14,6 @@
  */
 
 import { BLEDevice } from "./main/ble-device"
-import { DiscoveredDevice } from "./main/ble/discovered-device"
 import { XioamiHelper } from "./main/xioami-helper"
 
 export default function (app: any) {
@@ -43,11 +42,25 @@ export default function (app: any) {
                 values: [ 
                   {
                     path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.temperature`,
-                    value: d.lastTemperature
+                    value: d.lastTemperature,
+                    context: app.getSelfPath('uuid'),
+                    source: {
+                      label: plugin.id,
+                      type: 'NMEA2000',
+                      pgn: 130312,
+                    },
+                    timestamp: d.lastSeen
                   },
                   {
                     path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.humidity`,
-                    value: d.lastHumidity
+                    value: d.lastHumidity,
+                    context: app.getSelfPath('uuid'),
+                    source: {
+                      label: plugin.id,
+                      type: 'NMEA2000',
+                      pgn: 130313,
+                    },
+                    timestamp: d.lastSeen
                   },
                   {
                     path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.battery`,
@@ -56,6 +69,10 @@ export default function (app: any) {
                   {
                     path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.voltage`,
                     value: d.lastVoltage
+                  },
+                  {
+                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.lastSeen`,
+                    value: d.lastSeen
                   },
               ]
               }
@@ -68,7 +85,7 @@ export default function (app: any) {
           const interval = setInterval(() => {
             const last = new Date(d.lastSeen).getTime();
             const now = Date.now();
-            console.log('Reporting for: ' + d.address);
+            // console.log('Reporting for: ' + d.address);
             if (now - last < 10 * 1000 * d.reportRate) {
                 reportData();
             }
@@ -116,6 +133,7 @@ export default function (app: any) {
         device.lastVoltage = d.lastVoltage;
         device.lastSeen = d.lastSeen;
         
+        // console.log(new Date().toISOString() + ': Latest values for ' + d.address + ': ' + d.lastTemperature + 'C, ' + d.lastHumidity + '%, ' + d.lastVoltage + 'mV, ' + d.lastBattery + '%');
 
       });
       

@@ -1,6 +1,5 @@
 import { BLEDevice } from "./ble-device";
 import { BleScanner } from "./ble-scanner";
-import { DiscoveredDevice } from "./ble/discovered-device";
 
 
 export class XioamiHelper {
