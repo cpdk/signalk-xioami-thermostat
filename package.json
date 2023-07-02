@@ -4,17 +4,24 @@
   "description": "Plugin to support Xioami BLE Thermostats",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "format": "prettier-standard 'src/*.ts'",
+    "build": "tsc",
+    "watch": "npm run build -- -w",
+    "create-release": "github-create-release --owner cpdk --repository signalk-xioami-thermostat",
+    "release": "git tag -d v$npm_package_version ; git tag v$npm_package_version && git push --tags && git push && npm run create-release"
+   },
   "keywords": [
     "signalk-node-server-plugins",
     "signalk-category-hardware"
   ],
   "author": "Christian Petersen",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@types/noble": "^0.0.41",
-    "@types/node": "^20.3.3"
+    "@types/node": "^18.12.1",
+    "@signalk/github-create-release": "^1.2.1",
+    "prettier-standard": "^16.4.1",
+    "typescript": "^4.5.5"
   },
   "dependencies": {
     "@abandonware/noble": "^1.9.2-21",

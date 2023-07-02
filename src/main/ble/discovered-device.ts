@@ -1,8 +1,11 @@
-export class DiscoveredDevice {
-  public localName: string;
-  public rssi: number;
-  public address: string;
-  public token: string;
-  public lastSeen: number;
-  public state: string;
+export interface DiscoveredDevice {
+  localName: string;
+  rssi: number;
+  address: string;
+  token: string;
+  lastSeen: number;
+  state: string;
+
+  lastTemperature: number;
+  lastHumidity: number;
 }

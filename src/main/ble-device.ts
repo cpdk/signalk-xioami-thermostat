@@ -1,13 +1,15 @@
 
-export class BLEDevice {
+export interface BLEDevice {
 
-    public firstSeen: string;
-    public lastSeen: string;
-    public address: string;
-    public name: string;
-    public dataName: string;
-    public lastTemperature: number;
-    public lasthumidity: number;
-    public enabled: boolean;
+    firstSeen: string;
+    lastSeen: string;
+    address: string;
+    name: string;
+    dataName: string;
+    lastTemperature: number;
+    lastHumidity: number;
+    enabled: boolean;
+    inside: boolean;
+    reportRate: number;
 
 } 
