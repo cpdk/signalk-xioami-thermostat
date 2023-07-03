@@ -170,6 +170,7 @@ export default function (app: any) {
           devices: {
             title: 'Devices',
             type: 'array',
+            minItems: 0,
             description: knownDevices.length + ' BLE Devices found',
             items: {
               type: 'object',
