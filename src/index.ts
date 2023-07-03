@@ -84,7 +84,7 @@ export default function (app: any) {
                       d.dataName
                     }.battery.percentage`,
                     timestamp: d.lastSeen,
-                    value: d.lastBattery
+                    value: d.lastBattery / 100
                   },
                   {
                     path: `environment.${d.inside ? 'inside' : 'outside'}.${
