@@ -122,7 +122,7 @@ export default function (app: any) {
           app.debug('Creating new device in registry')
           device = {
             address: d.address,
-            enabled: true,
+            enabled: props.enabled,
             dataName: d.address,
             lastSeen: new Date().toISOString(),
             firstSeen: new Date().toISOString(),
@@ -163,6 +163,10 @@ export default function (app: any) {
         //title: plugin.name,
         type: 'object',
         properties: {
+          enabled: {
+            type: 'boolean',
+            title: 'Enable data capture for all discovered devices?'
+          },
           devices: {
             title: 'Devices',
             type: 'array',
@@ -231,5 +235,6 @@ interface Plugin {
 }
 
 interface ConfigData {
-  devices: BLEDevice[]
+  devices: BLEDevice[],
+  enabled: boolean
 }
