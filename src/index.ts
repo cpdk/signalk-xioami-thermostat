@@ -106,7 +106,7 @@ export default function (app: any) {
         }
       }
 
-      app.debug('Xioami BLE Plugin starting');
+      app.debug('Xioami BLE Scanner starting');
       XioamiHelper.startBLEScanner();
       XioamiHelper.registerListener((d: BLEDevice) => {
         // check against known devices
@@ -144,13 +144,14 @@ export default function (app: any) {
         device.lastSeen = d.lastSeen
 
         // console.log(new Date().toISOString() + ': Latest values for ' + d.address + ': ' + d.lastTemperature + 'C, ' + d.lastHumidity + '%, ' + d.lastVoltage + 'mV, ' + d.lastBattery + '%');
-      })
+      });
     },
 
     stop: function () {
-      XioamiHelper.stopBLEScanner()
+      XioamiHelper.stopBLEScanner();
       onStop.forEach((f: any) => f())
-      onStop = []
+      onStop = [];
+      app.debug('Xioami BLE Plugin stopped');
     },
 
     id: 'signalk-xioami-thermostat',
