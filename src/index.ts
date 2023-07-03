@@ -49,7 +49,7 @@ export default function (app: any) {
                     path: `environment.${d.inside ? 'inside' : 'outside'}.${
                       d.dataName
                     }.temperature`,
-                    value: d.lastTemperature,
+                    value: d.lastTemperature + 273.15, // due to pgn we report in Kelvin
                     context: app.getSelfPath('uuid'),
                     source: {
                       label: plugin.id,
