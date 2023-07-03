@@ -174,7 +174,7 @@ export default function (app: any) {
             description: knownDevices.length + ' BLE Devices found',
             items: {
               type: 'object',
-              required: ['address', 'name', 'dataName', 'inside', 'enabled'],
+              required: ['address', 'dataName'],
               properties: {
                 address: {
                   type: 'string',
