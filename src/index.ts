@@ -61,6 +61,14 @@ export default function (app: any) {
                   {
                     path: `environment.${d.inside ? 'inside' : 'outside'}.${
                       d.dataName
+                    }.temperature.celcius`,
+                    value: d.lastTemperature,
+                    context: app.getSelfPath('uuid'),
+                    timestamp: d.lastSeen
+                  },
+                  {
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
                     }.humidity`,
                     value: d.lastHumidity,
                     context: app.getSelfPath('uuid'),
@@ -74,21 +82,17 @@ export default function (app: any) {
                   {
                     path: `environment.${d.inside ? 'inside' : 'outside'}.${
                       d.dataName
-                    }.battery`,
+                    }.battery.percentage`,
+                    timestamp: d.lastSeen,
                     value: d.lastBattery
                   },
                   {
                     path: `environment.${d.inside ? 'inside' : 'outside'}.${
                       d.dataName
-                    }.voltage`,
+                    }.battery.voltage`,
+                    timestamp: d.lastSeen,
                     value: d.lastVoltage
                   },
-                  {
-                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
-                      d.dataName
-                    }.lastSeen`,
-                    value: d.lastSeen
-                  }
                 ]
               }
             ]
