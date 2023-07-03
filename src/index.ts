@@ -179,7 +179,7 @@ export default function (app: any) {
                 address: {
                   type: 'string',
                   title: 'BLE Address',
-                  enum: knownDevices.map(d => d.address)
+                  enum: (knownDevices && knownDevices.length > 0) ? knownDevices.map(d => d.address) : undefined
                 },
                 dataName: {
                   type: 'string',
