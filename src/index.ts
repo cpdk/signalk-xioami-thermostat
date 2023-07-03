@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { BLEDevice } from "./main/ble-device"
-import { XioamiHelper } from "./main/xioami-helper"
+import { BLEDevice } from './main/ble-device'
+import { XioamiHelper } from './main/xioami-helper'
 
 export default function (app: any) {
   const error = app.error
@@ -22,126 +22,133 @@ export default function (app: any) {
   let props: ConfigData
   let onStop: any = []
   let foundDevices: any = {}
-  let knownDevices: BLEDevice[] = [];
+  let knownDevices: BLEDevice[] = []
 
   const plugin: Plugin = {
     start: function (properties: ConfigData) {
+      app.debug('Xioami BLE Plugin starting');
       props = properties
 
-      if ( !props?.devices ) {
-        props.devices = [];
+      if (!props?.devices) {
+        props.devices = []
       }
 
       const handleDevice = (d: BLEDevice) => {
-        foundDevices[d.address] = d;
-        
+        foundDevices[d.address] = d
+
         const reportData = () => {
           app.handleMessage(plugin.id, {
             updates: [
               {
-                values: [ 
+                values: [
                   {
-                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.temperature`,
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
+                    }.temperature`,
                     value: d.lastTemperature,
                     context: app.getSelfPath('uuid'),
                     source: {
                       label: plugin.id,
                       type: 'NMEA2000',
-                      pgn: 130312,
+                      pgn: 130312
                     },
                     timestamp: d.lastSeen
                   },
                   {
-                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.humidity`,
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
+                    }.humidity`,
                     value: d.lastHumidity,
                     context: app.getSelfPath('uuid'),
                     source: {
                       label: plugin.id,
                       type: 'NMEA2000',
-                      pgn: 130313,
+                      pgn: 130313
                     },
                     timestamp: d.lastSeen
                   },
                   {
-                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.battery`,
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
+                    }.battery`,
                     value: d.lastBattery
                   },
                   {
-                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.voltage`,
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
+                    }.voltage`,
                     value: d.lastVoltage
                   },
                   {
-                    path: `environment.${ (d.inside) ? 'inside' : 'outside'}.${d.dataName}.lastSeen`,
+                    path: `environment.${d.inside ? 'inside' : 'outside'}.${
+                      d.dataName
+                    }.lastSeen`,
                     value: d.lastSeen
-                  },
-              ]
+                  }
+                ]
               }
             ]
-          });
-        };
+          })
+        }
 
         if (d.enabled) {
           // start timer for device
           const interval = setInterval(() => {
-            const last = new Date(d.lastSeen).getTime();
-            const now = Date.now();
+            const last = new Date(d.lastSeen).getTime()
+            const now = Date.now()
             // console.log('Reporting for: ' + d.address);
             if (now - last < 10 * 1000 * d.reportRate) {
-                reportData();
+              reportData()
             }
-          }, d.reportRate * 1000);
-          onStop.push(() => clearInterval(interval));
-          reportData();
+          }, d.reportRate * 1000)
+          onStop.push(() => clearInterval(interval))
+          reportData()
         }
-      };
+      }
 
       app.debug('Xioami BLE Plugin starting');
       XioamiHelper.startBLEScanner();
       XioamiHelper.registerListener((d: BLEDevice) => {
         // check against known devices
-        let device: BLEDevice | undefined = undefined;
+        let device: BLEDevice | undefined = undefined
         for (const de of knownDevices) {
           if (de.address == d.address) {
-            device = de;
+            device = de
             // app.debug('Device is known in registry: ' + de.dataName);
-            break;
+            break
           }
         }
         if (!device) {
-          app.debug('Creating new device in registry');
+          app.debug('Creating new device in registry')
           device = {
             address: d.address,
-            enabled: true, 
+            enabled: true,
             dataName: d.address,
             lastSeen: new Date().toISOString(),
             firstSeen: new Date().toISOString(),
             reportRate: 60,
             inside: true,
-            name: d.address,
             lastHumidity: d.lastHumidity,
             lastTemperature: d.lastTemperature,
             lastBattery: d.lastBattery,
             lastVoltage: d.lastVoltage
           }
-          handleDevice(device);
-          knownDevices.push(device);
+          handleDevice(device)
+          knownDevices.push(device)
         }
-        
-        device.lastHumidity = d.lastHumidity;
-        device.lastTemperature = d.lastTemperature;
-        device.lastBattery = d.lastBattery;
-        device.lastVoltage = d.lastVoltage;
-        device.lastSeen = d.lastSeen;
-        
-        // console.log(new Date().toISOString() + ': Latest values for ' + d.address + ': ' + d.lastTemperature + 'C, ' + d.lastHumidity + '%, ' + d.lastVoltage + 'mV, ' + d.lastBattery + '%');
 
-      });
-      
-      
+        device.lastHumidity = d.lastHumidity
+        device.lastTemperature = d.lastTemperature
+        device.lastBattery = d.lastBattery
+        device.lastVoltage = d.lastVoltage
+        device.lastSeen = d.lastSeen
+
+        // console.log(new Date().toISOString() + ': Latest values for ' + d.address + ': ' + d.lastTemperature + 'C, ' + d.lastHumidity + '%, ' + d.lastVoltage + 'mV, ' + d.lastBattery + '%');
+      })
     },
 
     stop: function () {
-      XioamiHelper.stopBLEScanner();
+      XioamiHelper.stopBLEScanner()
       onStop.forEach((f: any) => f())
       onStop = []
     },
@@ -158,7 +165,7 @@ export default function (app: any) {
           devices: {
             title: 'Devices',
             type: 'array',
-            description: 'BLE Devices found',
+            description: knownDevices.length + ' BLE Devices found',
             items: {
               type: 'object',
               required: ['address', 'name', 'dataName', 'inside', 'enabled'],
@@ -168,13 +175,10 @@ export default function (app: any) {
                   title: 'BLE Address',
                   enum: knownDevices.map(d => d.address)
                 },
-                name: {
-                  type: 'string',
-                  title: 'BLE Name'
-                },
                 dataName: {
                   type: 'string',
-                  title: 'The XXX to use after environment.INSIDE|OUTSIDE.XXX.temperature|humidity'
+                  title:
+                    'The XXX to use after environment.INSIDE|OUTSIDE.XXX.temperature|humidity'
                 },
                 inside: {
                   type: 'boolean',
@@ -188,24 +192,6 @@ export default function (app: any) {
                   type: 'number',
                   title: 'Rate of data read/push in seconds?',
                   default: 60
-                },
-                firstSeen: {
-                  type: 'string',
-                  'format': 'date-time',
-                  title: 'First time this device was seen'
-                },
-                lastSeen: {
-                  type: 'string',
-                  'format': 'date-time',
-                  title: 'Last time this device was seen'
-                },
-                lastTemperature: {
-                  type: 'number',
-                  title: 'Last measured temperature'
-                },
-                lastHumidity: {
-                  type: 'number',
-                  title: 'Last measured humidity'
                 }
               }
             }
@@ -214,7 +200,7 @@ export default function (app: any) {
       }
     }
   }
-  
+
   // function makeBinaryStatusReport (bank: any) {
   //   const pgn: any = {
   //     pgn: 127501,
@@ -244,7 +230,5 @@ interface Plugin {
 }
 
 interface ConfigData {
-
-  devices: BLEDevice[];
-
+  devices: BLEDevice[]
 }

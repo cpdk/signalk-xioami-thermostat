@@ -11,7 +11,7 @@
     "release": "git tag -d v$npm_package_version ; git tag v$npm_package_version && git push --tags && git push && npm run create-release"
    },
   "keywords": [
-    "signalk-node-server-plugins",
+    "signalk-node-server-plugin",
     "signalk-category-hardware"
   ],
   "author": "Christian Petersen",
