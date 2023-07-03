@@ -30,7 +30,11 @@ export default function (app: any) {
       props = properties
 
       if (!props?.devices) {
-        props.devices = []
+        props.devices = [];
+        app.debug('No devices received in configuration');
+      } else {
+        app.debug('Received ' + props.devices.length + ' devices in configuration');
+        app.debug(JSON.stringify(props.devices));
       }
 
       const handleDevice = (d: BLEDevice) => {
@@ -114,12 +118,11 @@ export default function (app: any) {
         for (const de of knownDevices) {
           if (de.address == d.address) {
             device = de
-            // app.debug('Device is known in registry: ' + de.dataName);
             break
           }
         }
         if (!device) {
-          app.debug('Creating new device in registry')
+          app.debug('Creating new device in registry: ' + d.address);
           device = {
             address: d.address,
             enabled: props.enabled,
@@ -132,7 +135,18 @@ export default function (app: any) {
             lastTemperature: d.lastTemperature,
             lastBattery: d.lastBattery,
             lastVoltage: d.lastVoltage
+          };
+
+          for (const d of props.devices) {
+            if (d.address == device.address) {
+              app.debug('Found configuration for device: ' + d.address);
+              device.reportRate = d.reportRate;
+              device.inside = d.inside;
+              device.enabled = d.enabled;
+              device.dataName = d.dataName;
+            }
           }
+
           handleDevice(device)
           knownDevices.push(device)
         }
