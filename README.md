@@ -7,6 +7,7 @@ This plugin is designed to add support for reading temperature and humidity from
 ## Prerequisites
 
 - A platform with BLE support (the plugin is designed to run on a Raspberry Pi).
+- This plugin uses Noble - so please follow guide here: https://github.com/noble/noble#running-on-linux to ensure non-root users have access to BLE
 - One or more Xiaomi LYWSD03MMC Bluetooth BLE Thermometers with patched firmware.
 
 ## Firmware Patching
