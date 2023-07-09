@@ -17,6 +17,7 @@ import { BLEDevice } from './main/ble-device';
 import { Log } from './main/log/log-manager';
 import { XioamiHelper } from './main/xioami-helper';
 import { DateUtils } from './main/util/date-utils';
+import { LogLevel } from './main/log/log-level';
 
 export default function (app: any) {
   const error = app.error
@@ -31,6 +32,12 @@ export default function (app: any) {
     start: function (properties: ConfigData) {
       app.debug('Xioami BLE Plugin starting');
       props = properties;
+
+      if (properties.debugLog) {
+        Log.info('Debug log enabled');
+      } else {
+        Log.Level = 1;
+      }
 
       if (!props?.devices) {
         props.devices = [];
@@ -114,7 +121,7 @@ export default function (app: any) {
               Log.debug('Reporting data for: ' + d.dataName + ' - data from: ' + d.lastSeen);
               reportData();
             } else {
-            //  Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen + ' - ' + startTime);
+             Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen + ' - ' + startTime);
             }
           }, delay);
           Log.info('Started reporting loop for: ' + d.dataName + ' - delay: ' + delay + ' - ' + d.reportRate);
@@ -194,6 +201,10 @@ export default function (app: any) {
             type: 'boolean',
             title: 'Enable data capture for all discovered devices?'
           },
+          debugLog: {
+            type: 'boolean',
+            title: 'Verbose logging?'
+          },
           devices: {
             title: 'Devices',
             type: 'array',
@@ -264,5 +275,6 @@ interface Plugin {
 
 interface ConfigData {
   devices: BLEDevice[],
-  enabled: boolean
+  enabled: boolean,
+  debugLog: boolean
 }
