@@ -153,7 +153,7 @@ export default function (app: any) {
           for (const d of props.devices) {
             if (d.address == device.address) {
               app.debug('Found configuration for device: ' + d.address);
-              device.reportRate = d.reportRate;
+              device.reportRate = d.reportRate || 60;
               device.inside = d.inside;
               device.enabled = d.enabled;
               device.dataName = d.dataName;
