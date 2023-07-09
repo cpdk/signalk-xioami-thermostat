@@ -105,6 +105,7 @@ export default function (app: any) {
         if (d.enabled) {
           // start timer for device
           const startTime = DateUtils.get();
+          const delay = Math.max(10000, d.reportRate * 1000);
           const interval = setInterval(() => {
             const last = new Date(d.lastSeen).getTime()
             const now = Date.now()
@@ -115,8 +116,8 @@ export default function (app: any) {
             } else {
               Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen + ' - ' + startTime);
             }
-          }, Math.max(10000, d.reportRate * 1000));
-          Log.info('Started reporting loop for: ' + d.dataName);
+          }, delay);
+          Log.info('Started reporting loop for: ' + d.dataName + ' - delay: ' + delay);
           onStop.push(() => clearInterval(interval));
           reportData();
         }
