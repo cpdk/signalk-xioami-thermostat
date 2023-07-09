@@ -35,6 +35,7 @@ export default function (app: any) {
 
       if (properties.debugLog) {
         Log.info('Debug log enabled');
+        Log.Level = 0;
       } else {
         Log.Level = 1;
       }
