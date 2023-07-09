@@ -114,10 +114,10 @@ export default function (app: any) {
               Log.debug('Reporting data for: ' + d.dataName + ' - data from: ' + d.lastSeen);
               reportData();
             } else {
-              Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen + ' - ' + startTime);
+            //  Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen + ' - ' + startTime);
             }
           }, delay);
-          Log.info('Started reporting loop for: ' + d.dataName + ' - delay: ' + delay);
+          Log.info('Started reporting loop for: ' + d.dataName + ' - delay: ' + delay + ' - ' + d.reportRate);
           onStop.push(() => clearInterval(interval));
           reportData();
         }
