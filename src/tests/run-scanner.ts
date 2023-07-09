@@ -1,3 +1,5 @@
+import { DateUtils } from "../main/util/date-utils";
+
 const plugin = require('../main/index');
 
 
@@ -7,7 +9,7 @@ async function main() {
     
     const dummyApp = {
         debug: (s: string) => {
-            console.log(new Date().toISOString() + ': ' + s);
+            console.log(DateUtils.get() + ': ' + s);
         }
     };
     const plg = plugin(dummyApp);

@@ -3,6 +3,7 @@ import {Log} from './log/log-manager';
 import { ServiceUUID } from './ble/ble-service-uuids';
 import { StringUtils } from './util/string-utils';
 import { BLEDevice } from './ble-device';
+import { DateUtils } from './util/date-utils';
 
 let noble: any;
 
@@ -48,13 +49,13 @@ export class BleScanner {
 
     private registerListeners() {
         noble.on('scanStart', () => {
-            Log.info('Scanning Started');
+            Log.info('BLE Scanning Started');
             BleScanner.btScanningActive = true;
             BleScanner.lastState = 'Scanning Started';
             // this.notifyState();
         });
         noble.on('scanStop', () => {
-            Log.info('Scanning Stopped');
+            Log.info('BLE Scanning Stopped');
             BleScanner.btScanningActive = false;
             BleScanner.lastState = 'Scanning Stopped';
             // this.notifyState();
@@ -96,7 +97,7 @@ export class BleScanner {
         // console.log('First ' + f.length + ' bytes as hex: ' + f.toString('hex'));
 
         let d = {} as BLEDevice;
-        d.lastSeen = new Date().toISOString();
+        d.lastSeen = DateUtils.get();
         d.address = peripheral.address;
         d.address = peripheral.advertisement.localName;
         d.lastTemperature = data.readInt16BE(6) / 10;
@@ -125,6 +126,7 @@ export class BleScanner {
     }
 
     public stopScanning() {
+        Log.info('Stopping scanner');
         noble.stopScanning();
     }
 }

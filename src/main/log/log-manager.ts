@@ -1,3 +1,4 @@
+import { DateUtils } from '../util/date-utils';
 import { LogLevel } from './log-level';
 
 export class Log {
@@ -8,7 +9,7 @@ export class Log {
 
 
     public static getFormatedDate(): string {
-        return new Date().toISOString()
+        return DateUtils.get();
     }
 
     public static info(s: string) {

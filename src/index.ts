@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import { BLEDevice } from './main/ble-device'
-import { XioamiHelper } from './main/xioami-helper'
+import { BLEDevice } from './main/ble-device';
+import { Log } from './main/log/log-manager';
+import { XioamiHelper } from './main/xioami-helper';
+import { DateUtils } from './main/util/date-utils';
 
 export default function (app: any) {
   const error = app.error
@@ -23,11 +25,12 @@ export default function (app: any) {
   let onStop: any = []
   let foundDevices: any = {}
   let knownDevices: BLEDevice[] = []
+  
 
   const plugin: Plugin = {
     start: function (properties: ConfigData) {
       app.debug('Xioami BLE Plugin starting');
-      props = properties
+      props = properties;
 
       if (!props?.devices) {
         props.devices = [];
@@ -106,11 +109,14 @@ export default function (app: any) {
             const now = Date.now()
             // console.log('Reporting for: ' + d.address);
             if (now - last < 10 * 1000 * d.reportRate) {
-              reportData()
+              Log.debug('Reporting data for: ' + d.dataName + ' - data from: ' + d.lastSeen);
+              reportData();
+            } else {
+              Log.debug('No new data to report for: ' + d.dataName + ' - last data from: ' + d.lastSeen);
             }
-          }, d.reportRate * 1000)
-          onStop.push(() => clearInterval(interval))
-          reportData()
+          }, Math.max(10000, d.reportRate * 1000));
+          onStop.push(() => clearInterval(interval));
+          reportData();
         }
       }
 
@@ -121,8 +127,8 @@ export default function (app: any) {
         let device: BLEDevice | undefined = undefined
         for (const de of knownDevices) {
           if (de.address == d.address) {
-            device = de
-            break
+            device = de;
+            break;
           }
         }
         if (!device) {
@@ -131,8 +137,8 @@ export default function (app: any) {
             address: d.address,
             enabled: props.enabled,
             dataName: d.address,
-            lastSeen: new Date().toISOString(),
-            firstSeen: new Date().toISOString(),
+            lastSeen: DateUtils.get(),
+            firstSeen: DateUtils.get(),
             reportRate: 60,
             inside: true,
             lastHumidity: d.lastHumidity,
@@ -151,17 +157,17 @@ export default function (app: any) {
             }
           }
 
-          handleDevice(device)
-          knownDevices.push(device)
+          handleDevice(device);
+          knownDevices.push(device);
         }
 
-        device.lastHumidity = d.lastHumidity
-        device.lastTemperature = d.lastTemperature
-        device.lastBattery = d.lastBattery
-        device.lastVoltage = d.lastVoltage
-        device.lastSeen = d.lastSeen
+        device.lastHumidity = d.lastHumidity;
+        device.lastTemperature = d.lastTemperature;
+        device.lastBattery = d.lastBattery;
+        device.lastVoltage = d.lastVoltage;
+        device.lastSeen = d.lastSeen;
 
-        // console.log(new Date().toISOString() + ': Latest values for ' + d.address + ': ' + d.lastTemperature + 'C, ' + d.lastHumidity + '%, ' + d.lastVoltage + 'mV, ' + d.lastBattery + '%');
+        Log.debug('Received data for: ' + device.dataName + ' data from: ' + d.lastSeen);
       });
     },
 
