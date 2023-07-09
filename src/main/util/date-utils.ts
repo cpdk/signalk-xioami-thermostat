@@ -20,7 +20,7 @@ export class DateUtils {
     }
 
     public static get(): string {
-        return DateUtils.get();
+        return DateUtils.toLocalISOString(new Date());
     }
 
 }
