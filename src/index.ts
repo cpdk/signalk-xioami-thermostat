@@ -178,7 +178,7 @@ export default function (app: any) {
         device.lastVoltage = d.lastVoltage;
         device.lastSeen = d.lastSeen;
 
-        Log.debug('Received data for: ' + device.dataName + ' data from: ' + d.lastSeen);
+        // Log.debug('Received data for: ' + device.dataName + ' data from: ' + d.lastSeen);
       });
     },
 
