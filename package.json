@@ -1,6 +1,6 @@
 {
   "name": "signalk-xioami-thermostat",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin to support Xioami BLE Thermostats",
   "main": "index.js",
   "signalk-plugin-enabled-by-default": true,
